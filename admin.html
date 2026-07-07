@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠物食品商店管理端</title>
+  <script src="https://static.cloudbase.net/cloudbase-js-sdk/2.10.0/cloudbase.full.js"></script>
+  <style>
+    :root {
+      --cream: #fff8dc;
+      --ink: #24211d;
+      --muted: #7b7468;
+      --line: #eee5c7;
+      --panel: rgba(255, 255, 255, 0.9);
+      --accent: #315d4f;
+      --accent-2: #b95738;
+      --shadow: 0 18px 50px rgba(52, 45, 28, 0.12);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255, 223, 130, 0.36), transparent 32rem),
+        linear-gradient(135deg, #fff8dc 0%, #f7efe3 46%, #eef5ef 100%);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .login-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .login-card {
+      width: min(440px, 100%);
+      padding: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.68);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #315d4f, #d27d4f);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .login-card h1 {
+      margin-top: 18px;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .subtle {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-top: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .upload-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--ink);
+      outline: none;
+      background: rgba(255, 255, 255, 0.88);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .select:focus {
+      border-color: rgba(49, 93, 79, 0.7);
+      box-shadow: 0 0 0 4px rgba(49, 93, 79, 0.08);
+    }
+
+    .primary-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px 18px;
+      border-radius: 15px;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #315d4f, #cc7448);
+      box-shadow: 0 14px 28px rgba(49, 93, 79, 0.16);
+    }
+
+    .app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .app.active {
+      display: block;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(238, 229, 199, 0.8);
+      background: rgba(255, 248, 220, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .identity h1 {
+      font-size: 22px;
+    }
+
+    .ghost-btn,
+    .danger-btn,
+    .soft-btn {
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .ghost-btn {
+      color: var(--accent);
+      background: rgba(49, 93, 79, 0.1);
+    }
+
+    .soft-btn {
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .danger-btn {
+      color: #9a3412;
+      background: rgba(185, 87, 56, 0.1);
+    }
+
+    .layout {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 24px 22px 42px;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 92px;
+      height: fit-content;
+      padding: 12px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn {
+      width: 100%;
+      padding: 13px 14px;
+      margin: 4px 0;
+      text-align: left;
+      border-radius: 16px;
+      color: var(--muted);
+      font-weight: 800;
+      background: transparent;
+    }
+
+    .nav-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, #315d4f, #d18454);
+    }
+
+    .content {
+      min-width: 0;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .hero h2 {
+      font-size: clamp(26px, 4vw, 42px);
+      letter-spacing: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 12px 32px rgba(63, 52, 30, 0.08);
+    }
+
+    .stat b {
+      display: block;
+      font-size: 28px;
+      margin-top: 8px;
+    }
+
+    .panel {
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .panel-head h3 {
+      font-size: 20px;
+    }
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-form .wide {
+      grid-column: 1 / -1;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 70px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .thumb {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      object-fit: cover;
+      background: var(--cream);
+    }
+
+    .item-title {
+      font-weight: 900;
+      margin-bottom: 5px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(49, 93, 79, 0.1);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .badge.warn {
+      color: #9a3412;
+      background: rgba(185, 87, 56, 0.12);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 30;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(36, 33, 29, 0.9);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+        padding: 18px 14px 32px;
+      }
+
+      .sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .nav-btn {
+        text-align: center;
+        padding: 10px 6px;
+        font-size: 13px;
+      }
+
+      .hero,
+      .stats,
+      .grid-form {
+        grid-template-columns: 1fr;
+      }
+
+      .item {
+        grid-template-columns: 58px minmax(0, 1fr);
+      }
+
+      .item .actions {
+        grid-column: 1 / -1;
+      }
+
+      .topbar-inner {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="loginShell" class="login-shell">
+    <section class="login-card">
+      <div class="brand-mark">PET</div>
+      <h1>宠物食品商店管理端</h1>
+      <p class="subtle">管理商品、分类、首页图片和订单处理。账号 admin，密码 123。</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">账号</label>
+          <input id="username" class="input" value="admin" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" class="input" type="password" value="123" autocomplete="current-password" />
+        </div>
+        <button class="primary-btn" type="submit">登录管理端</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="app" class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="identity">
+          <div class="brand-mark">PET</div>
+          <div>
+            <h1>宠物食品商店</h1>
+            <p class="subtle">网页管理端</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="refreshBtn" class="ghost-btn">刷新数据</button>
+          <button id="logoutBtn" class="soft-btn">退出</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="layout">
+      <nav class="sidebar">
+        <button class="nav-btn active" data-view="products">商品</button>
+        <button class="nav-btn" data-view="categories">分类</button>
+        <button class="nav-btn" data-view="home">首页</button>
+        <button class="nav-btn" data-view="shop">店铺</button>
+        <button class="nav-btn" data-view="orders">订单</button>
+      </nav>
+
+      <section class="content">
+        <div class="hero">
+          <div>
+            <h2 id="viewTitle">商品管理</h2>
+            <p class="subtle">真机调试时在这里维护数据，小程序端会从云数据库读取。</p>
+          </div>
+          <button id="resetFormBtn" class="soft-btn">清空表单</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span class="meta">商品</span><b id="productCount">0</b></div>
+          <div class="stat"><span class="meta">分类</span><b id="categoryCount">0</b></div>
+          <div class="stat"><span class="meta">待处理订单</span><b id="pendingCount">0</b></div>
+          <div class="stat"><span class="meta">已处理订单</span><b id="doneCount">0</b></div>
+        </div>
+
+        <section id="productsView" class="view">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>编辑商品</h3>
+              <span id="productEditing" class="badge hidden">编辑中</span>
+            </div>
+            <form id="productForm" class="grid-form">
+              <input type="hidden" id="productId" />
+              <div class="field">
+                <label>商品名称</label>
+                <input id="productName" class="input" required />
+              </div>
+              <div class="field">
+                <label>分类</label>
+                <select id="productCategory" class="select"></select>
+              </div>
+              <div class="field">
+                <label>售价，元</label>
+                <input id="productPrice" class="input" type="number" min="0" step="0.01" required />
+              </div>
+              <div class="field">
+                <label>原价，元</label>
+                <input id="productOriginPrice" class="input" type="number" min="0" step="0.01" />
+              </div>
+              <div class="field">
+                <label>库存</label>
+                <input id="productStock" class="input" type="number" min="0" step="1" value="0" />
+              </div>
+              <div class="field">
+                <label>规格</label>
+                <input id="productSpec" class="input" placeholder="例：500g / 1kg" />
+              </div>
+              <div class="field wide">
+                <label>封面图片</label>
+                <div class="input-row">
+                  <input id="productCover" class="input" readonly />
+                  <button class="soft-btn" type="button" data-upload-target="productCover" data-upload-dir="products">上传图片</button>
+                </div>
+              </div>
+              <div class="field wide">
+                <label>商品详情图</label>
+                <div class="input-row">
+                  <textarea id="productImages" class="textarea" readonly></textarea>
+                  <button class="soft-btn" type="button" data-upload-target="productImages" data-upload-dir="products" data-upload-mode="append">上传图片</button>
+                </div>
+              </div>
+              <div class="field wide">
+                <label>商品描述</label>
+                <textarea id="productDesc" class="textarea"></textarea>
+              </div>
+              <div class="field">
+                <label>状态</label>
+                <select id="productStatus" class="select">
+                  <option value="on_sale">上架</option>
+                  <option value="off_sale">下架</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>排序</label>
+                <input id="productSort" class="input" type="number" value="0" />
+              </div>
+              <div class="actions wide">
+                <button class="primary-btn" type="submit">保存商品</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>商品列表</h3>
+              <span class="badge">可直接编辑</span>
+            </div>
+            <div id="productList" class="list"></div>
+          </div>
+        </section>
+
+        <section id="categoriesView" class="view hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>编辑分类</h3>
+              <span id="categoryEditing" class="badge hidden">编辑中</span>
+            </div>
+            <form id="categoryForm" class="grid-form">
+              <input type="hidden" id="categoryId" />
+              <div class="field">
+                <label>分类名称</label>
+                <input id="categoryName" class="input" required />
+              </div>
+              <div class="field">
+                <label>排序</label>
+                <input id="categorySort" class="input" type="number" value="0" />
+              </div>
+              <div class="field wide">
+                <label>分类图片</label>
+                <div class="input-row">
+                  <input id="categoryImage" class="input" readonly />
+                  <button class="soft-btn" type="button" data-upload-target="categoryImage" data-upload-dir="categories">上传图片</button>
+                </div>
+              </div>
+              <div class="actions wide">
+                <button class="primary-btn" type="submit">保存分类</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>分类列表</h3></div>
+            <div id="categoryList" class="list"></div>
+          </div>
+        </section>
+
+        <section id="homeView" class="view hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>首页图片</h3>
+              <span class="badge">使用 home_banners</span>
+            </div>
+            <form id="homeForm" class="grid-form">
+              <div class="field wide">
+                <label>首页背景图</label>
+                <input id="homeBackground" class="input" placeholder="HTTPS 图片地址" />
+              </div>
+              <div class="field wide">
+                <label>点单按钮图</label>
+                <input id="homeCategoryButton" class="input" placeholder="HTTPS 图片地址" />
+              </div>
+              <div class="field wide">
+                <label>订单按钮图</label>
+                <input id="homeOrdersButton" class="input" placeholder="HTTPS 图片地址" />
+              </div>
+              <div class="actions wide">
+                <button class="primary-btn" type="submit">保存首页图片</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="ordersView" class="view hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>订单列表</h3>
+              <div class="actions">
+                <button class="soft-btn" data-order-filter="all">全部</button>
+                <button class="soft-btn" data-order-filter="pending_delivery">待处理</button>
+                <button class="soft-btn" data-order-filter="completed">已处理</button>
+              </div>
+            </div>
+            <div id="orderList" class="list"></div>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const CLOUD_ENV = 'cloud1-d4gs0dh5u11b7f62d';
+    const ADMIN_FUNCTION = 'admin';
+    const TOKEN_KEY = 'pet_shop_admin_token';
+
+    const app = cloudbase.init({ env: CLOUD_ENV });
+    const auth = app.auth({ persistence: 'local' });
+
+    const state = {
+      token: localStorage.getItem(TOKEN_KEY) || '',
+      activeView: 'products',
+      orderFilter: 'all',
+      products: [],
+      categories: [],
+      banners: [],
+      orders: [],
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function money(value) {
+      return (Number(value || 0)).toFixed(2);
+    }
+
+    function imageFallback(url) {
+      return url || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" rx="18" fill="%23fff8dc"/><text x="60" y="65" text-anchor="middle" font-size="14" fill="%237b7468">No Image</text></svg>';
+    }
+
+    function showToast(message) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    async function ensureAuth() {
+      const loginState = await auth.getLoginState();
+      if (loginState) return;
+      await auth.anonymousAuthProvider().signIn();
+    }
+
+    async function callAdmin(action, payload = {}) {
+      await ensureAuth();
+      const data = action === 'webLogin' ? payload : { ...payload, webToken: state.token };
+      const res = await app.callFunction({
+        name: ADMIN_FUNCTION,
+        data: { action, payload: data },
+      });
+      const result = res.result;
+      if (!result || result.code !== 'Success') {
+        throw new Error((result && result.msg) || '云函数调用失败');
+      }
+      return result.data;
+    }
+
+    function showApp() {
+      $('loginShell').style.display = 'none';
+      $('app').classList.add('active');
+    }
+
+    function showLogin() {
+      $('loginShell').style.display = 'grid';
+      $('app').classList.remove('active');
+    }
+
+    async function login(username, password) {
+      const data = await callAdmin('webLogin', { username, password });
+      state.token = data.token;
+      localStorage.setItem(TOKEN_KEY, state.token);
+      showApp();
+      await loadAll();
+      showToast('登录成功');
+    }
+
+    function logout() {
+      state.token = '';
+      localStorage.removeItem(TOKEN_KEY);
+      showLogin();
+    }
+
+    async function loadAll() {
+      const [categories, products, homeConfig, orders] = await Promise.all([
+        callAdmin('listCategories'),
+        callAdmin('listProducts'),
+        callAdmin('getHomeConfig'),
+        callAdmin('listOrders', { status: state.orderFilter, pageSize: 80 }),
+      ]);
+      state.categories = categories || [];
+      state.products = products || [];
+      state.banners = (homeConfig && homeConfig.banners) || [];
+      state.orders = orders || [];
+      renderAll();
+    }
+
+    function renderAll() {
+      renderStats();
+      renderCategoryOptions();
+      renderProducts();
+      renderCategories();
+      renderHomeForm();
+      renderOrders();
+    }
+
+    function renderStats() {
+      $('productCount').textContent = state.products.length;
+      $('categoryCount').textContent = state.categories.length;
+      $('pendingCount').textContent = state.orders.filter((item) => item.status !== 'completed').length;
+      $('doneCount').textContent = state.orders.filter((item) => item.status === 'completed').length;
+    }
+
+    function renderCategoryOptions() {
+      $('productCategory').innerHTML = state.categories
+        .map((item) => `<option value="${item._id}">${item.name}</option>`)
+        .join('');
+    }
+
+    function categoryName(id) {
+      const category = state.categories.find((item) => item._id === id);
+      return category ? category.name : '未分类';
+    }
+
+    function renderProducts() {
+      $('productList').innerHTML = state.products
+        .map((item) => `
+          <article class="item">
+            <img class="thumb" src="${imageFallback(item.coverImage || (item.images && item.images[0]))}" />
+            <div>
+              <div class="item-title">${item.name || ''}</div>
+              <div class="meta">${categoryName(item.categoryId)} · ¥${money(item.price)} · 库存 ${item.stock || 0}</div>
+              <div class="meta">${item.status === 'on_sale' ? '上架中' : '已下架'} · 排序 ${item.sort || 0}</div>
+            </div>
+            <div class="actions">
+              <button class="ghost-btn" data-edit-product="${item._id}">编辑</button>
+              <button class="danger-btn" data-delete-product="${item._id}">删除</button>
+            </div>
+          </article>
+        `)
+        .join('');
+    }
+
+    function renderCategories() {
+      $('categoryList').innerHTML = state.categories
+        .map((item) => `
+          <article class="item">
+            <img class="thumb" src="${imageFallback(item.imageUrl)}" />
+            <div>
+              <div class="item-title">${item.name || ''}</div>
+              <div class="meta">排序 ${item.sort || 0} · ${item.enabled === false ? '已隐藏' : '显示中'}</div>
+            </div>
+            <div class="actions">
+              <button class="ghost-btn" data-edit-category="${item._id}">编辑</button>
+              <button class="danger-btn" data-delete-category="${item._id}">删除</button>
+            </div>
+          </article>
+        `)
+        .join('');
+    }
+
+    function bannerBySlot(slot) {
+      return state.banners.find((item) => item.slot === slot) || {};
+    }
+
+    function renderHomeForm() {
+      $('homeBackground').value = (bannerBySlot('background').imageUrl || state.banners[0]?.imageUrl || '');
+      $('homeCategoryButton').value = bannerBySlot('categoryButton').imageUrl || '';
+      $('homeOrdersButton').value = bannerBySlot('ordersButton').imageUrl || '';
+    }
+
+    function renderOrders() {
+      $('orderList').innerHTML = state.orders
+        .map((order) => {
+          const goods = order.goodsList || [];
+          const amount = Number(order.totalAmount || order.totalPayAmount || 0) / 100;
+          const address = order.userAddress || {};
+          return `
+            <article class="item">
+              <img class="thumb" src="${imageFallback(goods[0] && (goods[0].primaryImage || goods[0].thumb))}" />
+              <div>
+                <div class="item-title">${order.orderNo || ''} <span class="badge ${order.status === 'completed' ? '' : 'warn'}">${order.status === 'completed' ? '已处理' : '待处理'}</span></div>
+                <div class="meta">${goods.map((item) => `${item.goodsName || item.title || ''} x${item.quantity || 1}`).join('，')}</div>
+                <div class="meta">合计 ¥${money(amount)} · ${address.name || ''} ${address.phone || ''}</div>
+                <div class="meta">${address.regionText || ''} ${address.detailAddress || ''}</div>
+              </div>
+              <div class="actions">
+                ${order.status === 'completed' ? '' : `<button class="ghost-btn" data-complete-order="${order.orderNo}">标记已处理</button>`}
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+    }
+
+    function switchView(view) {
+      state.activeView = view;
+      document.querySelectorAll('.nav-btn').forEach((btn) => btn.classList.toggle('active', btn.dataset.view === view));
+      document.querySelectorAll('.view').forEach((el) => el.classList.add('hidden'));
+      $(`${view}View`).classList.remove('hidden');
+      $('viewTitle').textContent = {
+        products: '商品管理',
+        categories: '分类管理',
+        home: '首页配置',
+        orders: '订单管理',
+      }[view];
+    }
+
+    function resetProductForm() {
+      $('productForm').reset();
+      $('productId').value = '';
+      $('productStock').value = '0';
+      $('productSort').value = '0';
+      $('productStatus').value = 'on_sale';
+      $('productEditing').classList.add('hidden');
+    }
+
+    function resetCategoryForm() {
+      $('categoryForm').reset();
+      $('categoryId').value = '';
+      $('categorySort').value = '0';
+      $('categoryEditing').classList.add('hidden');
+    }
+
+    function resetCurrentForm() {
+      if (state.activeView === 'products') resetProductForm();
+      if (state.activeView === 'categories') resetCategoryForm();
+      if (state.activeView === 'home') renderHomeForm();
+    }
+
+    async function saveProduct(event) {
+      event.preventDefault();
+      const images = $('productImages').value
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean);
+      const cover = $('productCover').value.trim();
+      await callAdmin('saveProduct', {
+        product: {
+          _id: $('productId').value || undefined,
+          name: $('productName').value.trim(),
+          categoryId: $('productCategory').value,
+          price: Number($('productPrice').value || 0),
+          originPrice: Number($('productOriginPrice').value || $('productPrice').value || 0),
+          stock: Number($('productStock').value || 0),
+          spec: $('productSpec').value.trim(),
+          coverImage: cover,
+          images: images.length ? images : (cover ? [cover] : []),
+          description: $('productDesc').value.trim(),
+          status: $('productStatus').value,
+          sort: Number($('productSort').value || 0),
+        },
+      });
+      resetProductForm();
+      await loadAll();
+      showToast('商品已保存');
+    }
+
+    async function saveCategory(event) {
+      event.preventDefault();
+      await callAdmin('saveCategory', {
+        category: {
+          _id: $('categoryId').value || undefined,
+          name: $('categoryName').value.trim(),
+          imageUrl: $('categoryImage').value.trim(),
+          sort: Number($('categorySort').value || 0),
+          enabled: true,
+        },
+      });
+      resetCategoryForm();
+      await loadAll();
+      showToast('分类已保存');
+    }
+
+    async function saveHome(event) {
+      event.preventDefault();
+      await callAdmin('saveHomeConfig', {
+        banners: [
+          { slot: 'background', title: '首页背景', imageUrl: $('homeBackground').value.trim(), enabled: true, sort: 0 },
+          { slot: 'categoryButton', title: '点单按钮图', imageUrl: $('homeCategoryButton').value.trim(), enabled: true, sort: 1 },
+          { slot: 'ordersButton', title: '订单按钮图', imageUrl: $('homeOrdersButton').value.trim(), enabled: true, sort: 2 },
+        ],
+      });
+      await loadAll();
+      showToast('首页图片已保存');
+    }
+
+    document.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (target.matches('.nav-btn')) switchView(target.dataset.view);
+      if (target.dataset.editProduct) {
+        const item = state.products.find((product) => product._id === target.dataset.editProduct);
+        if (!item) return;
+        $('productId').value = item._id;
+        $('productName').value = item.name || '';
+        $('productCategory').value = item.categoryId || '';
+        $('productPrice').value = item.price || '';
+        $('productOriginPrice').value = item.originPrice || '';
+        $('productStock').value = item.stock || 0;
+        $('productSpec').value = item.spec || '';
+        $('productCover').value = item.coverImage || '';
+        $('productImages').value = (item.images || []).join('\n');
+        $('productDesc').value = item.description || '';
+        $('productStatus').value = item.status || 'on_sale';
+        $('productSort').value = item.sort || 0;
+        $('productEditing').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (target.dataset.deleteProduct && confirm('确定删除这个商品吗？')) {
+        await callAdmin('deleteProduct', { id: target.dataset.deleteProduct });
+        await loadAll();
+        showToast('商品已删除');
+      }
+      if (target.dataset.editCategory) {
+        const item = state.categories.find((category) => category._id === target.dataset.editCategory);
+        if (!item) return;
+        $('categoryId').value = item._id;
+        $('categoryName').value = item.name || '';
+        $('categoryImage').value = item.imageUrl || '';
+        $('categorySort').value = item.sort || 0;
+        $('categoryEditing').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (target.dataset.deleteCategory && confirm('确定删除这个分类吗？')) {
+        await callAdmin('deleteCategory', { id: target.dataset.deleteCategory });
+        await loadAll();
+        showToast('分类已删除');
+      }
+      if (target.dataset.completeOrder) {
+        await callAdmin('completeOrder', { orderNo: target.dataset.completeOrder });
+        await loadAll();
+        showToast('订单已处理');
+      }
+      if (target.dataset.orderFilter) {
+        state.orderFilter = target.dataset.orderFilter;
+        await loadAll();
+      }
+    });
+
+    $('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await login($('username').value.trim(), $('password').value);
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+
+    $('productForm').addEventListener('submit', (event) => saveProduct(event).catch((error) => showToast(error.message)));
+    $('categoryForm').addEventListener('submit', (event) => saveCategory(event).catch((error) => showToast(error.message)));
+    $('homeForm').addEventListener('submit', (event) => saveHome(event).catch((error) => showToast(error.message)));
+    $('logoutBtn').addEventListener('click', logout);
+    $('refreshBtn').addEventListener('click', () => loadAll().then(() => showToast('数据已刷新')).catch((error) => showToast(error.message)));
+    $('resetFormBtn').addEventListener('click', resetCurrentForm);
+
+    if (state.token) {
+      showApp();
+      loadAll().catch((error) => {
+        showToast(error.message);
+        logout();
+      });
+    }
+  </script>
+</body>
+</html>
